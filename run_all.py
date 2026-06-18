@@ -1,6 +1,11 @@
 import argparse
 import logging
+import os
+import warnings
 from pathlib import Path
+
+os.environ.setdefault("LOKY_MAX_CPU_COUNT", str(os.cpu_count() or 1))
+warnings.filterwarnings("ignore", category=UserWarning, module=r"joblib\.externals\.loky\.backend\.context")
 
 import numpy as np
 import pandas as pd
@@ -49,15 +54,7 @@ def apply_quick(config):
     config["experiment"]["seeds"] = [config["experiment"]["seeds"][0]]
     config["experiment"]["epochs"] = min(int(config["experiment"]["epochs"]), 6)
     config["experiment"]["patience"] = min(int(config["experiment"]["patience"]), 3)
-    installed = []
-    for pkg, name in [("xgboost", "xgboost"), ("lightgbm", "lightgbm")]:
-        try:
-            __import__(pkg)
-            installed.append(name)
-            break
-        except Exception:
-            pass
-    config["models"]["classical"] = ["persistence", "logistic"] + installed
+    config["models"]["classical"] = ["persistence", "logistic", "xgboost"]
     config["models"]["tslib"] = []
     config["ablations"]["enabled"] = False
     return config

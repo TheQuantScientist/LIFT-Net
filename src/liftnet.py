@@ -58,7 +58,14 @@ def _adjacency_for_sample(x, feature_cols, graph_type):
     mat = x[:, -30:, idx]
     if mat.shape[1] < 5:
         return np.eye(n, dtype=np.float32)
-    corr = np.corrcoef(mat)
+    std = np.nanstd(mat, axis=1)
+    if np.isfinite(std).sum() < 2 or np.nanmax(std) <= 1e-8:
+        return np.eye(n, dtype=np.float32)
+    mat = mat.copy()
+    mat[~np.isfinite(mat)] = 0.0
+    corr = np.eye(n, dtype=np.float32)
+    valid = std > 1e-8
+    corr[np.ix_(valid, valid)] = np.corrcoef(mat[valid])
     corr = np.nan_to_num(corr, nan=0.0, posinf=0.0, neginf=0.0)
     corr = np.clip(corr, 0, None)
     np.fill_diagonal(corr, 1.0)

@@ -37,6 +37,8 @@ export TSLIB_PATH=/path/to/Time-Series-Library
 
 The runner checks requested TSLib models and skips unavailable or constructor-incompatible models gracefully.
 
+Classical optional packages are handled with fallbacks. If `xgboost`, `lightgbm`, or `hmmlearn` are missing, the pipeline trains dependency-free sklearn fallback baselines and records the fallback reason in `results/results.csv` and `results/summary.xlsx`.
+
 ## Outputs
 
 - `results/results.parquet`: prediction-level long table for all models.
