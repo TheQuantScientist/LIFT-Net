@@ -151,12 +151,25 @@ def _assign_split(df, exp):
     return df
 
 
+def _apply_by_symbol(df, func, **kwargs):
+    frames = []
+    for symbol, g in df.sort_values(["symbol", "date"]).groupby("symbol", sort=False):
+        out = func(g.copy(), **kwargs)
+        if "symbol" not in out.columns:
+            out["symbol"] = symbol
+        frames.append(out)
+    if not frames:
+        return df.copy()
+    return pd.concat(frames, ignore_index=True)
+
+
 def build_features_and_labels(df, config):
     horizons = config["labels"]["horizons"]
     fcfg = config["features"]
-    out = df.groupby("symbol", group_keys=False).apply(_symbol_features)
+    out = _apply_by_symbol(df, _symbol_features)
     out = _add_market_features(out)
-    out = out.groupby("symbol", group_keys=False).apply(
+    out = _apply_by_symbol(
+        out,
         _add_labels,
         horizons=horizons,
         window=fcfg["label_percentile_window"],
