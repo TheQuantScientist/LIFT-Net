@@ -1,0 +1,98 @@
+symbols:
+  - BTCUSDT
+  - ETHUSDT
+  - BNBUSDT
+  - SOLUSDT
+  - XRPUSDT
+  - ADAUSDT
+  - DOGEUSDT
+  - AVAXUSDT
+  - DOTUSDT
+  - LINKUSDT
+  - TRXUSDT
+  - LTCUSDT
+  - BCHUSDT
+  - ATOMUSDT
+  - NEARUSDT
+  - UNIUSDT
+  - AAVEUSDT
+  - ETCUSDT
+  - FILUSDT
+  - ICPUSDT
+
+start_date: "2020-01-01"
+end_date: null
+
+data:
+  source: "binance_spot_daily"
+  raw_dir: "data/raw"
+  processed_dir: "data/processed"
+  use_cached: true
+
+features:
+  rolling_windows: [7, 14, 30, 60, 90]
+  label_percentile_window: 365
+  label_min_periods: 180
+  add_technical_features: true
+  add_market_features: true
+
+labels:
+  horizons: [1, 3, 7]
+  primary_horizon: 3
+  fragility_k: 2
+
+experiment:
+  lookback: 60
+  train_start: "2020-01-01"
+  train_end: "2023-12-31"
+  val_start: "2024-01-01"
+  val_end: "2024-12-31"
+  test_start: "2025-01-01"
+  test_end: null
+  seeds: [1, 2, 3]
+  batch_size: 64
+  epochs: 60
+  patience: 10
+  learning_rate: 0.001
+
+models:
+  classical:
+    - persistence
+    - logistic
+    - random_forest
+    - xgboost
+    - lightgbm
+    - isolation_forest
+    - hmm
+  tslib:
+    - TimesNet
+    - PatchTST
+    - iTransformer
+    - TimeMixer
+    - TimeXer
+    - DLinear
+    - Transformer
+  proposed:
+    - LIFT-Net
+
+ablations:
+  enabled: true
+  run_feature_ablations: true
+  run_graph_ablations: true
+  feature_ablations:
+    - full
+    - price_only
+    - liquidity_only
+    - no_market_features
+    - no_technical_features
+  graph_ablations:
+    - liquidity_corr
+    - return_corr
+    - fully_connected
+    - identity
+
+outputs:
+  results_parquet: "results/results.parquet"
+  results_csv: "results/results.csv"
+  summary_excel: "results/summary.xlsx"
+  figures_dir: "results/figures"
